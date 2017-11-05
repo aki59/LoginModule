@@ -3,6 +3,7 @@ package com.wipro.LoginMod.controller;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -17,8 +18,8 @@ import com.wipro.LoginMod.service.UserService;
 @Controller
 public class LoginController {
 	
-	@Autowired
-	private UserService userService;
+   @Autowired
+	UserService userService;
 
 	@RequestMapping(value={"/", "/login"}, method = RequestMethod.GET)
 	public ModelAndView login(){

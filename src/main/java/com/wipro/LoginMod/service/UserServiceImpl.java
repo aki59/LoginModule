@@ -5,12 +5,14 @@ import java.util.HashSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import com.wipro.LoginMod.model.Role;
 import com.wipro.LoginMod.model.RoleRepository;
 import com.wipro.LoginMod.model.User;
 import com.wipro.LoginMod.model.UserRepository;
 
+@Service("userService")
 public class UserServiceImpl implements UserService {
 
 	@Autowired
