@@ -15,7 +15,19 @@ import com.wipro.LoginMod.model.UserRepository;
 @Service("userService")
 public class UserServiceImpl implements UserService {
 
-	@Autowired
+	@Override
+	public User findUserByEmail(String email) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void saveUser(User user) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/*@Autowired
 	private UserRepository userRepository;
 	
 	@Autowired
@@ -41,6 +53,6 @@ public class UserServiceImpl implements UserService {
 		userRepository.save(user);
 		
 		
-	}
+	}*/
 
 }

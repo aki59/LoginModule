@@ -18,6 +18,17 @@ public class Role {
 	
 	@Column(name="role")
 	private String role;
+	
+	@Column(name="description")
+    private String description;
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
 	public int getId() {
 		return id;

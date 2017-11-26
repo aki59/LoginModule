@@ -1,69 +1,93 @@
 package com.wipro.LoginMod;
 
-import javax.sql.DataSource;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
+/**
+ * Created by nydiarra on 06/05/17.
+ */
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-	
+
+	@Value("${security.signing-key}")
+	private String signingKey;
+
+	@Value("${security.encoding-strength}")
+	private Integer encodingStrength;
+
+	@Value("${security.security-realm}")
+	private String securityRealm;
+
 	@Autowired
-	private BCryptPasswordEncoder bCryptPasswordEncoder;
-	
-	@Autowired
-	private DataSource dataSource;
-	
-	@Value("${spring.queries.users-query}")
-	private String userQuery;
-	
-	@Value("${spring.queries.roles-query}")
-	private String roleQuery;
-	
+	private UserDetailsService userDetailsService;
+
+	@Bean
 	@Override
-	public void configure(AuthenticationManagerBuilder auth) throws Exception
-	{auth.jdbcAuthentication()
-		.usersByUsernameQuery(userQuery)
-		.authoritiesByUsernameQuery(roleQuery)
-		.dataSource(dataSource)
-		.passwordEncoder(bCryptPasswordEncoder);
-		
+	protected AuthenticationManager authenticationManager() throws Exception {
+		return super.authenticationManager();
 	}
 	
+	/**
+	 * 
+	 */
+
 	@Override
-	public void configure(HttpSecurity http) throws Exception 
-	{
-		http.authorizeRequests()
-		.antMatchers("/").permitAll()
-		.antMatchers("/login").permitAll()
-		.antMatchers("/registration").permitAll()
-		.antMatchers("/admin/**").hasAuthority("ADMIN").anyRequest()
-		.authenticated().and().csrf().disable().formLogin()
-		.loginPage("/login").failureUrl("/login?error=true")
-		.defaultSuccessUrl("/admin/home")
-		.usernameParameter("email")
-		.passwordParameter("password")
-		.and().logout()
-		.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-		.logoutSuccessUrl("/").and().exceptionHandling()
-		.accessDeniedPage("/access-denied");
-	}
-	
-	@Override
-	public void configure(WebSecurity web) throws Exception {
-	    web
-	       .ignoring()
-	       .antMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/images/**");
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		//Including SHA Encoding Bcrypt was not working
+		auth.userDetailsService(userDetailsService)
+		        .passwordEncoder(new ShaPasswordEncoder(encodingStrength));
 	}
 
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		http
+		        .sessionManagement()
+		        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+		        .and()
+		        .httpBasic()
+		        .realmName(securityRealm)
+		        .and()
+		        .csrf()
+		        .disable();
+
+	}
+
+	@Bean
+	public JwtAccessTokenConverter accessTokenConverter() {
+		JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+		converter.setSigningKey(signingKey);
+		return converter;
+	}
+
+	@Bean
+	public TokenStore tokenStore() {
+		return new JwtTokenStore(accessTokenConverter());
+	}
+
+	@Bean
+	@Primary //Making this primary to avoid any accidental duplication with another token service instance of the same name
+	public DefaultTokenServices tokenServices() {
+		DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
+		defaultTokenServices.setTokenStore(tokenStore());
+		defaultTokenServices.setSupportRefreshToken(true);
+		return defaultTokenServices;
+	}
 }

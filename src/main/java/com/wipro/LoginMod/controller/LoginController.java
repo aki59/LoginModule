@@ -1,26 +1,40 @@
 package com.wipro.LoginMod.controller;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.wipro.LoginMod.impl.GenericService;
+import com.wipro.LoginMod.model.RandomCity;
 import com.wipro.LoginMod.model.User;
 import com.wipro.LoginMod.service.UserService;
 
-@Controller
+@RestController
+@RequestMapping("/loginapp")
 public class LoginController {
 	
    @Autowired
-	UserService userService;
+	GenericService userService;
+   
+   @RequestMapping(value ="/cities")
+   @PreAuthorize("hasAuthority('ADMIN_USER') or hasAuthority('STANDARD_USER')")
+   public List<RandomCity> getUser(){
+       return userService.findAllRandomCities();
+   }
 
+   /*
 	@RequestMapping(value={"/", "/login"}, method = RequestMethod.GET)
 	public ModelAndView login(){
 		ModelAndView modelAndView = new ModelAndView();
@@ -68,7 +82,13 @@ public class LoginController {
 		modelAndView.addObject("adminMessage","Content Available Only for Users with Admin Role");
 		modelAndView.setViewName("admin/home");
 		return modelAndView;
-	}
+	}*/
+   
+   @RequestMapping(value ="/users", method = RequestMethod.GET)
+   @PreAuthorize("hasAuthority('ADMIN_USER')")
+   public List<User> getUsers(){
+       return userService.findAllUsers();
+   }
 	
 
 }

@@ -1,10 +1,12 @@
 package com.wipro.LoginMod.model;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -19,7 +21,7 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 
 @Entity
-@Table(name="user")
+@Table(name="users")
 public class User {
 	
 	@Id
@@ -33,19 +35,45 @@ public class User {
 	@Column(name = "password")
 	@Length(min = 5, message = "*Your password must have at least 5 characters")
 	@NotEmpty(message = "*Please provide your password")
-	@Transient
+	
 	private String password;
-	@Column(name = "name")
+	@Column(name = "Username")
 	@NotEmpty(message = "*Please provide your name")
-	private String name;
+	private String userName;
 	@Column(name = "last_name")
 	@NotEmpty(message = "*Please provide your last name")
 	private String lastName;
 	@Column(name = "active")
 	private int active;
-	@ManyToMany(cascade = CascadeType.ALL)
+	
+	@Column(name="first_name")
+	private String firstName;
+	@Column(name="enabled")
+	private boolean enabled;
+	public boolean isEnabled() {
+		return enabled;
+	}
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	public String getFirstName() {
+		return firstName;
+	}
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+	@ManyToMany(fetch=FetchType.EAGER)
 	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-	private Set<Role> roles;
+	private List<Role> roles;
+	public void setRoles(List<Role> roles) {
+		this.roles = roles;
+	}
 	public int getId() {
 		return id;
 	}
@@ -64,12 +92,12 @@ public class User {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	public String getName() {
+	/*public String getName() {
 		return name;
 	}
 	public void setName(String name) {
 		this.name = name;
-	}
+	}*/
 	public String getLastName() {
 		return lastName;
 	}
@@ -82,11 +110,14 @@ public class User {
 	public void setActive(int active) {
 		this.active = active;
 	}
-	public Set<Role> getRoles() {
+	/*public Set<Role> getRoles() {
 		return roles;
 	}
 	public void setRoles(Set<Role> roles) {
 		this.roles = roles;
+	}*/
+	public List<Role> getRoles() {
+		return roles;
 	}
 
 }
