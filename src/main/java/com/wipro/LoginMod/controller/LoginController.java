@@ -19,7 +19,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.wipro.LoginMod.impl.GenericService;
 import com.wipro.LoginMod.model.RandomCity;
 import com.wipro.LoginMod.model.User;
-import com.wipro.LoginMod.service.UserService;
+//import com.wipro.LoginMod.service.UserService;
 
 @RestController
 @RequestMapping("/loginapp")
